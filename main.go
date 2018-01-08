@@ -6,8 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	//"golang.org/x/net/html"
-	"io/ioutil"
+	"github.com/yhat/scrape"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
+	//"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
@@ -126,9 +128,44 @@ func PrintHelp(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 	resp, _ := http.Get(config.EventURL)
-	bytes, _ := ioutil.ReadAll(resp.Body)
+	//bytes, _ := ioutil.ReadAll(resp.Body)
 
-	fmt.Println("HTML:\n\n", string(bytes))
+	root, err := html.Parse(resp.Body)
+	if err != nil {
+		// handle error
+	}
+	// Search for the title
 
+	/* 	matcher := func(n *html.Node) bool {
+		// must check for nil values
+		if n.DataAtom == atom.A && n.Parent != nil && n.Parent.Parent != nil {
+			return scrape.Attr(n.Parent.Parent, "class") == "upcoming"
+		}
+		return false
+	} */
+	// grab all articles and print them
+
+	allResults := scrape.FindAllNested(root, scrape.ByClass("upcoming_event"))
+	var gametimes, gamenamesS []string
+	//articles := scrape.FindAll(root, matcher)
+	for i, article := range allResults {
+		times := scrape.FindAll(article, scrape.ByClass("upcoming_event_timestamp"))
+		for k, thisart := range times {
+			gametimes = append(gametimes, scrape.Text(thisart))
+			fmt.Printf("%d %2d %s\n", i, k, scrape.Text(thisart))
+		}
+	}
+
+	for i, article := range allResults {
+		gamenames := scrape.FindAll(article, scrape.ByTag(atom.A))
+		for k, thisart := range gamenames {
+			gamenamesS = append(gamenamesS, scrape.Text(thisart))
+			fmt.Printf("%d %2d %s\n", i, k, scrape.Text(thisart))
+		}
+	}
+
+	fmt.Println(gametimes, gamenamesS)
+
+	//SendEmbed(s, config.BroadcastChannel, "", "Current Schedule", game)
 	resp.Body.Close()
 }
