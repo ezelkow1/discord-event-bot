@@ -161,7 +161,7 @@ func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	var buffer bytes.Buffer
 	for i := range gametimes {
-		buffer.WriteString(gametimes[i] + " - " + gamenameFixed[i] + "\n")
+		buffer.WriteString(gametimes[i] + " PST - " + gamenameFixed[i] + "\n")
 	}
 
 	SendEmbed(s, config.BroadcastChannel, "", "Current Schedule", buffer.String())
