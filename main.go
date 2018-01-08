@@ -89,8 +89,8 @@ func main() {
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 
 	// Set the playing status.
-	s.UpdateStatus(0, "keys go in my piehole")
-	SendEmbed(s, config.BroadcastChannel, "", "I iz here", "Eventbot has arrived, servicing all your scheduling needs")
+	s.UpdateStatus(0, "WHY U NO WHEN")
+	//SendEmbed(s, config.BroadcastChannel, "", "I iz here", "Eventbot has arrived, servicing all your scheduling needs")
 }
 
 // This function will be called (due to AddHandler above) every time a new
@@ -134,38 +134,36 @@ func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if err != nil {
 		// handle error
 	}
-	// Search for the title
-
-	/* 	matcher := func(n *html.Node) bool {
-		// must check for nil values
-		if n.DataAtom == atom.A && n.Parent != nil && n.Parent.Parent != nil {
-			return scrape.Attr(n.Parent.Parent, "class") == "upcoming"
-		}
-		return false
-	} */
 	// grab all articles and print them
 
 	allResults := scrape.FindAllNested(root, scrape.ByClass("upcoming_event"))
 	var gametimes, gamenamesS []string
-	//articles := scrape.FindAll(root, matcher)
-	for i, article := range allResults {
+
+	for _, article := range allResults {
 		times := scrape.FindAll(article, scrape.ByClass("upcoming_event_timestamp"))
-		for k, thisart := range times {
+		for _, thisart := range times {
 			gametimes = append(gametimes, scrape.Text(thisart))
-			fmt.Printf("%d %2d %s\n", i, k, scrape.Text(thisart))
 		}
 	}
 
-	for i, article := range allResults {
+	for _, article := range allResults {
 		gamenames := scrape.FindAll(article, scrape.ByTag(atom.A))
-		for k, thisart := range gamenames {
+		for _, thisart := range gamenames {
 			gamenamesS = append(gamenamesS, scrape.Text(thisart))
-			fmt.Printf("%d %2d %s\n", i, k, scrape.Text(thisart))
 		}
 	}
 
-	fmt.Println(gametimes, gamenamesS)
+	var gamenameFixed []string
+	for i := range gamenamesS {
+		if gamenamesS[i] != "" {
+			gamenameFixed = append(gamenameFixed, gamenamesS[i])
+		}
+	}
+	var buffer bytes.Buffer
+	for i := range gametimes {
+		buffer.WriteString(gametimes[i] + " - " + gamenameFixed[i] + "\n")
+	}
 
-	//SendEmbed(s, config.BroadcastChannel, "", "Current Schedule", game)
+	SendEmbed(s, config.BroadcastChannel, "", "Current Schedule", buffer.String())
 	resp.Body.Close()
 }
