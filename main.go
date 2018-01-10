@@ -176,8 +176,8 @@ func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 		hour = now.Hour() - 12
 		ampm = "pm"
 	}
-
+	minute := fmt.Sprintf("%.2d", now.Minute())
 	SendEmbed(s, m.ChannelID, "Current Schedule", "Current Time: "+now.Month().String()+" "+
-		strconv.Itoa(now.Day())+" @ "+strconv.Itoa(hour)+":"+strconv.Itoa(now.Minute())+ampm+" PST", buffer.String())
+		strconv.Itoa(now.Day())+" @ "+strconv.Itoa(hour)+":"+minute+ampm+" PST", buffer.String())
 	resp.Body.Close()
 }
