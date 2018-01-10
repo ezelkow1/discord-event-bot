@@ -9,12 +9,13 @@ import (
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
-	//"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 //Configuration for bot
@@ -164,6 +165,19 @@ func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 		buffer.WriteString(gametimes[i] + " PST - " + gamenameFixed[i] + "\n")
 	}
 
-	SendEmbed(s, m.ChannelID, "", "Current Schedule", buffer.String())
+	location, _ := time.LoadLocation("America/Los_Angeles")
+
+	now := time.Now().In(location)
+	hour := 0
+	ampm := "am"
+	if now.Hour() < 12 {
+		hour = now.Hour()
+	} else {
+		hour = now.Hour() - 12
+		ampm = "pm"
+	}
+
+	SendEmbed(s, m.ChannelID, "Current Schedule", "Current Time: "+now.Month().String()+" "+
+		strconv.Itoa(now.Day())+" @ "+strconv.Itoa(hour)+":"+strconv.Itoa(now.Minute())+ampm+" PST", buffer.String())
 	resp.Body.Close()
 }
