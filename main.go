@@ -123,14 +123,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 func PrintHelp(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var buffer bytes.Buffer
 	buffer.WriteString("!schedule - prints out the upcoming schedule\n")
-	buffer.WriteString("!next - prints the next upcoming game\n")
+	//buffer.WriteString("!next - prints the next upcoming game\n")
 	SendEmbed(s, m.ChannelID, "", "Available Commands", buffer.String())
 }
 
 func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 	resp, _ := http.Get(config.EventURL)
 	//bytes, _ := ioutil.ReadAll(resp.Body)
-
 	root, err := html.Parse(resp.Body)
 	if err != nil {
 		// handle error
@@ -160,6 +159,7 @@ func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 			gamenameFixed = append(gamenameFixed, gamenamesS[i])
 		}
 	}
+
 	var buffer bytes.Buffer
 	for i := range gametimes {
 		buffer.WriteString(gametimes[i] + " PST - " + gamenameFixed[i] + "\n")
@@ -177,7 +177,13 @@ func printSchedule(s *discordgo.Session, m *discordgo.MessageCreate) {
 		ampm = "pm"
 	}
 	minute := fmt.Sprintf("%.2d", now.Minute())
+
+	if buffer.String() == "" {
+		buffer.WriteString("No Games Scheduled\n")
+	}
+
 	SendEmbed(s, m.ChannelID, "Current Schedule", "Current Time: "+now.Month().String()+" "+
 		strconv.Itoa(now.Day())+" @ "+strconv.Itoa(hour)+":"+minute+ampm+" PST", buffer.String())
+
 	resp.Body.Close()
 }
